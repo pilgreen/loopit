@@ -1,0 +1,21 @@
+[
+  {
+    "name": "one",
+    "value": 1,
+    "more": {
+      "good": "yes"
+    }
+  },{
+    "name": "two",
+    "value": 2,
+    "more": {
+      "good": "nope"
+    }
+  },{
+    "name": "three",
+    "value": 3,
+    "more": {
+      "good": "yes"
+    }
+  }
+]
