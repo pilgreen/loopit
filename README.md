@@ -14,3 +14,17 @@ The json flag simply passes the file contents through to the template. You can u
 #### -template file
 
 If you omit the template flag, the program will echo the JSON equivalent of the resulting map. This is a good way to see what objects are available for the template. Including the template parameter will pass the map through and echo the evaluated code. For more information on what is available with the "text/template" package, refer to the [online documentation](https://golang.org/pkg/text/template/).
+
+## Template functions
+
+The Go template package is very basic, but also extendable. Below are custom functions that are available inside the template.
+
+#### slice . start end
+
+The slice function will let you pull a subset of the master data set. For example, to range over the first five rows of a csv file use the following code.
+
+```
+{{ range slice . 0 5 }}
+  ... code goes here ...
+{{ end }}
+```

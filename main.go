@@ -11,7 +11,7 @@ import (
   "net/url"
   "os"
   "path"
-  "text/template"
+  "html/template"
 )
 
 func check(e error) {
@@ -87,8 +87,9 @@ func main() {
   }
 
   if len(*tmp) > 0 {
-    templates := template.Must(template.ParseFiles(*tmp))
-    templates.ExecuteTemplate(os.Stdout, path.Base(*tmp), &data)
+    templates := template.Must(template.New("").Funcs(funcMap).ParseFiles(*tmp))
+    err := templates.ExecuteTemplate(os.Stdout, path.Base(*tmp), data)
+    check(err)
   } else {
     b, err := json.Marshal(data)
     check(err)
