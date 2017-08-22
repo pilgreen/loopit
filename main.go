@@ -5,13 +5,14 @@ import (
   "encoding/json"
   "flag"
   "fmt"
+  "html/template"
   "io"
   "io/ioutil"
   "net/http"
   "net/url"
   "os"
   "path"
-  "html/template"
+  "path/filepath"
 )
 
 func check(e error) {
@@ -86,9 +87,12 @@ func main() {
     json.Unmarshal(fc, &data)
   }
 
-  if len(*tmp) > 0 {
-    templates := template.Must(template.New("").Funcs(funcMap).ParseFiles(*tmp))
-    err := templates.ExecuteTemplate(os.Stdout, path.Base(*tmp), data)
+  files, err := filepath.Glob(*tmp)
+  check(err)
+
+  if len(files) > 0 {
+    templates := template.Must(template.New("").Funcs(funcMap).ParseGlob(*tmp))
+    err := templates.ExecuteTemplate(os.Stdout, path.Base(files[0]), data)
     check(err)
   } else {
     b, err := json.Marshal(data)
