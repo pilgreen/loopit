@@ -19,12 +19,30 @@ If you omit the template flag, the program will echo the JSON equivalent of the 
 
 The Go template package is very basic, but also extendable. Below are custom functions that are available inside the template.
 
-#### slice . start end
+#### slice*([]interface{})* start*(int)* end*(int)*
 
-The slice function will let you pull a subset of the master data set. For example, to range over the first five rows of a csv file use the following code.
+The slice function will let you pull a subset of data. For example, to range over the first five rows of a csv file use the following code.
 
 ```
 {{ range slice . 0 5 }}
   ... code goes here ...
 {{ end }}
 ```
+
+#### file path*(string)*
+
+The file function will return either a local file or a remote url as a string.
+
+#### minify mimetype*(string)* contents*(string)*
+
+The minify functions sends a string through the [tdewolff/minify](https://github.com/tdewolff/minify) package. 
+
+The following mimetypes are supported, though I haven't fully tested each one yet:
+
++ "text/css"
++ "text/html"
++ "text/javascript"
+
+#### markdown contents*(string)*
+
+This function just sends the string through the `blackfriday.MarkdownCommon()` function and returns a string.
