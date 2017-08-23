@@ -5,7 +5,6 @@ import (
   "encoding/json"
   "flag"
   "fmt"
-  "html/template"
   "io"
   "io/ioutil"
   "net/http"
@@ -13,7 +12,18 @@ import (
   "os"
   "path"
   "path/filepath"
+  "text/template"
 )
+
+/**
+ * Global variables
+ */
+
+var templates *template.Template
+
+/**
+ * Private methods
+ */
 
 func check(e error) {
   if e != nil {
@@ -42,7 +52,7 @@ func openLocal(s string) *os.File {
   return file
 }
 
-func CsvToJson(s io.Reader) []interface{} {
+func csvToJson(s io.Reader) []interface{} {
   reader := csv.NewReader(s)
   fc, err := reader.ReadAll()
   check(err)
@@ -60,19 +70,23 @@ func CsvToJson(s io.Reader) []interface{} {
   return data
 }
 
+/**
+ * Main function
+ */
+
 func main() {
   var tmp = flag.String("template", "", "path to the template file")
   var jsonFile = flag.String("json", "", "path to a JSON file")
-  var csvFile = flag.String("csv", "", "path or url to a csv file") 
+  var csvFile = flag.String("csv", "", "path or url to a csv file")
   flag.Parse()
 
   var data interface{}
 
   if len(*csvFile) > 0 {
     if isUrl(*csvFile) {
-      data = CsvToJson(openRemote(*csvFile))
+      data = csvToJson(openRemote(*csvFile))
     } else {
-      data = CsvToJson(openLocal(*csvFile))
+      data = csvToJson(openLocal(*csvFile))
     }
   } else if len(*jsonFile) > 0 {
     var fc []byte
@@ -91,7 +105,7 @@ func main() {
   check(err)
 
   if len(files) > 0 {
-    templates := template.Must(template.New("").Funcs(funcMap).ParseGlob(*tmp))
+    templates = template.Must(template.New("").Funcs(funcMap).ParseGlob(*tmp))
     err := templates.ExecuteTemplate(os.Stdout, path.Base(files[0]), data)
     check(err)
   } else {
