@@ -1,9 +1,11 @@
-package main
+package tmpl
 
 import (
   "bytes"
+  "io/ioutil"
   "text/template"
 
+  "github.com/pilgreen/loopit/helpers"
   "github.com/russross/blackfriday"
   "github.com/tdewolff/minify"
   "github.com/tdewolff/minify/css"
@@ -11,11 +13,11 @@ import (
   "github.com/tdewolff/minify/js"
 )
 
-var funcMap = template.FuncMap {
-  "slice": slice,
-  "stringify": stringifyTemplate,
-  "minify": minifyCode,
-  "markdown": markdown,
+var FuncMap = template.FuncMap {
+  "slice": Slice,
+  "file": StringifyFile,
+  "minify": MinifyCode,
+  "markdown": Markdown,
 }
 
 /**
@@ -23,19 +25,27 @@ var funcMap = template.FuncMap {
  * Good for range to pull things like top 10
  */
 
-func slice(a []interface{}, start, end int) []interface{} {
+func Slice(a []interface{}, start, end int) []interface{} {
   return a[start:end]
 }
 
 /**
- * Returns template contents as a string
- * use to pass contents to minify
+ * Returns a file or url as a string
  */
 
-func stringifyTemplate(name string) string {
-  var doc bytes.Buffer
-  templates.ExecuteTemplate(&doc, name, nil)
-  return doc.String()
+func StringifyFile(name string) string {
+  var fc []byte
+  var err error
+
+  if helpers.IsUrl(name) {
+    b := helpers.OpenRemote(name)
+    fc, err = ioutil.ReadAll(b)
+  } else {
+    fc, err = ioutil.ReadFile(name)
+  }
+
+  helpers.Check(err)
+  return bytes.NewBuffer(fc).String()
 }
 
 /**
@@ -43,7 +53,7 @@ func stringifyTemplate(name string) string {
  * You must set the mimetype manually
  */
 
-func minifyCode(mimetype string, code string) (string, error) {
+func MinifyCode(mimetype string, code string) (string, error) {
   m := minify.New()
   m.AddFunc("text/css", css.Minify)
   m.AddFunc("text/html", html.Minify)
@@ -55,7 +65,7 @@ func minifyCode(mimetype string, code string) (string, error) {
  * Runs a string through blackfriday
  */
 
-func markdown(s string) string {
+func Markdown(s string) string {
   bits := []byte(s)
   newBits := blackfriday.MarkdownCommon(bits)
   return bytes.NewBuffer(newBits).String()

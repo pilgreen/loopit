@@ -1,74 +1,23 @@
 package main
 
 import (
-  "encoding/csv"
+  // "encoding/csv"
   "encoding/json"
   "flag"
-  "fmt"
-  "io"
+  // "fmt"
+  // "io"
   "io/ioutil"
-  "net/http"
-  "net/url"
+  // "net/http"
+  // "net/url"
   "os"
   "path"
   "path/filepath"
   "text/template"
+
+  // Local packages
+  "github.com/pilgreen/loopit/helpers"
+  "github.com/pilgreen/loopit/tmpl"
 )
-
-/**
- * Global variables
- */
-
-var templates *template.Template
-
-/**
- * Private methods
- */
-
-func check(e error) {
-  if e != nil {
-    fmt.Fprintln(os.Stderr, e)
-    os.Exit(1)
-  }
-}
-
-func isUrl(s string) bool {
-  _, err := url.ParseRequestURI(s);
-  if err != nil {
-    return false
-  }
-  return true
-}
-
-func openRemote(s string) io.ReadCloser {
-  resp, err := http.Get(s)
-  check(err)
-  return resp.Body
-}
-
-func openLocal(s string) *os.File {
-  file, err := os.Open(s)
-  check(err)
-  return file
-}
-
-func csvToJson(s io.Reader) []interface{} {
-  reader := csv.NewReader(s)
-  fc, err := reader.ReadAll()
-  check(err)
-
-  var data []interface{}
-  header := fc[0]
-  for _, row := range fc[1:] {
-    obj := make(map[string]interface{}, len(header))
-    for j, v := range row {
-      key := header[j]
-      obj[key] = v
-    }
-    data = append(data, obj)
-  }
-  return data
-}
 
 /**
  * Main function
@@ -83,34 +32,35 @@ func main() {
   var data interface{}
 
   if len(*csvFile) > 0 {
-    if isUrl(*csvFile) {
-      data = csvToJson(openRemote(*csvFile))
+    if helpers.IsUrl(*csvFile) {
+      data = helpers.ParseCSV(helpers.OpenRemote(*csvFile))
     } else {
-      data = csvToJson(openLocal(*csvFile))
+      data = helpers.ParseCSV(helpers.OpenLocal(*csvFile))
     }
   } else if len(*jsonFile) > 0 {
     var fc []byte
     var err error
 
-    if isUrl(*jsonFile) {
-      fc, err = ioutil.ReadAll(openRemote(*jsonFile))
+    if helpers.IsUrl(*jsonFile) {
+      b := helpers.OpenRemote(*jsonFile)
+      fc, err = ioutil.ReadAll(b)
     } else {
       fc, err = ioutil.ReadFile(*jsonFile)
     }
-    check(err)
+    helpers.Check(err)
     json.Unmarshal(fc, &data)
   }
 
   files, err := filepath.Glob(*tmp)
-  check(err)
+  helpers.Check(err)
 
   if len(files) > 0 {
-    templates = template.Must(template.New("").Funcs(funcMap).ParseGlob(*tmp))
+    templates := template.Must(template.New("").Funcs(tmpl.FuncMap).ParseGlob(*tmp))
     err := templates.ExecuteTemplate(os.Stdout, path.Base(files[0]), data)
-    check(err)
+    helpers.Check(err)
   } else {
     b, err := json.Marshal(data)
-    check(err)
+    helpers.Check(err)
     os.Stdout.Write(b)
   }
 }
