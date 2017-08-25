@@ -43,6 +43,10 @@ The following mimetypes are supported, though I haven't fully tested each one ye
 + "text/html"
 + "text/javascript"
 
-#### markdown contents(string)
+#### markdown text(string)
 
 This function just sends the string through the `blackfriday.MarkdownCommon()` function and returns a string.
+
+#### ampify html(string)
+
+This function converts `<iframe>` tags into `<amp-iframe>` tags. It could be expanded in the future if necessary to incorporate more amp elemens or convert additional native tags.

@@ -2,10 +2,13 @@ package tmpl
 
 import (
   "bytes"
+  "fmt"
   "io/ioutil"
+  "strings"
   "text/template"
 
   "github.com/pilgreen/loopit/helpers"
+  "github.com/PuerkitoBio/goquery"
   "github.com/russross/blackfriday"
   "github.com/tdewolff/minify"
   "github.com/tdewolff/minify/css"
@@ -14,10 +17,11 @@ import (
 )
 
 var FuncMap = template.FuncMap {
-  "slice": Slice,
+  "ampify": Ampify,
   "file": StringifyFile,
   "minify": MinifyCode,
   "markdown": Markdown,
+  "slice": Slice,
 }
 
 /**
@@ -69,4 +73,25 @@ func Markdown(s string) string {
   bits := []byte(s)
   newBits := blackfriday.MarkdownCommon(bits)
   return bytes.NewBuffer(newBits).String()
+}
+
+/**
+ * Converts iframes to amp-iframes
+ */
+
+func Ampify(s string) (string, error) {
+  doc, err := goquery.NewDocumentFromReader(strings.NewReader(s))
+  helpers.Check(err)
+
+  iframes := doc.Find("iframe")
+  iframes.Each(func(i int, ele *goquery.Selection) {
+    src, exists := ele.Attr("src");
+    if exists == true {
+      width := ele.AttrOr("width", "16")
+      height := ele.AttrOr("height", "9")
+      amp := fmt.Sprintf("<amp-iframe width='%s' height='%s' layout='responsive' sandbox='allow-scripts allow-same-origin' src='%s'></amp-iframe>", width, height, src)
+      ele.ReplaceWithHtml(amp)
+    }
+  })
+  return doc.Find("body").Html()
 }
