@@ -1,66 +1,86 @@
 package main
 
 import (
-  // "encoding/csv"
+  "bytes"
   "encoding/json"
   "flag"
-  // "fmt"
-  // "io"
   "io/ioutil"
-  // "net/http"
-  // "net/url"
   "os"
   "path"
   "path/filepath"
+  "regexp"
   "text/template"
 
   // Local packages
-  "github.com/pilgreen/loopit/helpers"
-  "github.com/pilgreen/loopit/tmpl"
+  "github.com/pilgreen/loopit/funcs"
 )
+
+var Config struct {
+  DataFile string
+  Shim bool
+}
 
 /**
  * Main function
  */
 
 func main() {
-  var tmp = flag.String("template", "", "path to the template file")
-  var jsonFile = flag.String("json", "", "path to a JSON file")
-  var csvFile = flag.String("csv", "", "path or url to a csv file")
+  flag.StringVar(&Config.DataFile, "data", "", "path or url to a JSON or CSV file")
+  flag.BoolVar(&Config.Shim, "shim", false, "shims content using goquery")
   flag.Parse()
 
+  var tmp = flag.Arg(0)
   var data interface{}
 
-  if len(*csvFile) > 0 {
-    if helpers.IsUrl(*csvFile) {
-      data = helpers.ParseCSV(helpers.OpenRemote(*csvFile))
-    } else {
-      data = helpers.ParseCSV(helpers.OpenLocal(*csvFile))
-    }
-  } else if len(*jsonFile) > 0 {
-    var fc []byte
-    var err error
+  if len(Config.DataFile) > 0 {
+    matchCSV, err := regexp.MatchString("\\.csv$", Config.DataFile)
+    funcs.Check(err)
 
-    if helpers.IsUrl(*jsonFile) {
-      b := helpers.OpenRemote(*jsonFile)
-      fc, err = ioutil.ReadAll(b)
-    } else {
-      fc, err = ioutil.ReadFile(*jsonFile)
+    if matchCSV {
+      if funcs.IsUrl(Config.DataFile) {
+        data = funcs.ParseCSV(funcs.OpenRemote(Config.DataFile))
+      } else {
+        data = funcs.ParseCSV(funcs.OpenLocal(Config.DataFile))
+      }
     }
-    helpers.Check(err)
-    json.Unmarshal(fc, &data)
+
+    matchJSON, err := regexp.MatchString("\\.json$", Config.DataFile)
+    funcs.Check(err)
+
+    if matchJSON {
+      var fc []byte
+      var err error
+
+      if funcs.IsUrl(Config.DataFile) {
+        b := funcs.OpenRemote(Config.DataFile)
+        fc, err = ioutil.ReadAll(b)
+      } else {
+        fc, err = ioutil.ReadFile(Config.DataFile)
+      }
+
+      funcs.Check(err)
+      json.Unmarshal(fc, &data)
+    }
   }
 
-  files, err := filepath.Glob(*tmp)
-  helpers.Check(err)
+  files, err := filepath.Glob(tmp)
+  funcs.Check(err)
 
   if len(files) > 0 {
-    templates := template.Must(template.New("").Funcs(tmpl.FuncMap).ParseGlob(*tmp))
-    err := templates.ExecuteTemplate(os.Stdout, path.Base(files[0]), data)
-    helpers.Check(err)
+    var src bytes.Buffer
+
+    templates := template.Must(template.New("").Funcs(funcs.FuncMap).ParseGlob(tmp))
+    err := templates.ExecuteTemplate(&src, path.Base(files[0]), data)
+    funcs.Check(err)
+
+    if Config.Shim {
+      src, err = funcs.Shim(src)
+    }
+
+    src.WriteTo(os.Stdout)
   } else {
     b, err := json.Marshal(data)
-    helpers.Check(err)
+    funcs.Check(err)
     os.Stdout.Write(b)
   }
 }

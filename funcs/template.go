@@ -1,4 +1,4 @@
-package tmpl
+package funcs
 
 import (
   "bytes"
@@ -7,7 +7,6 @@ import (
   "strings"
   "text/template"
 
-  "github.com/pilgreen/loopit/helpers"
   "github.com/PuerkitoBio/goquery"
   "github.com/russross/blackfriday"
   "github.com/tdewolff/minify"
@@ -22,6 +21,7 @@ var FuncMap = template.FuncMap {
   "minify": MinifyCode,
   "markdown": Markdown,
   "slice": Slice,
+  "shim": Shim,
 }
 
 /**
@@ -41,14 +41,14 @@ func StringifyFile(name string) string {
   var fc []byte
   var err error
 
-  if helpers.IsUrl(name) {
-    b := helpers.OpenRemote(name)
+  if IsUrl(name) {
+    b := OpenRemote(name)
     fc, err = ioutil.ReadAll(b)
   } else {
     fc, err = ioutil.ReadFile(name)
   }
 
-  helpers.Check(err)
+  Check(err)
   return bytes.NewBuffer(fc).String()
 }
 
@@ -81,7 +81,7 @@ func Markdown(s string) string {
 
 func Ampify(s string) (string, error) {
   doc, err := goquery.NewDocumentFromReader(strings.NewReader(s))
-  helpers.Check(err)
+  Check(err)
 
   iframes := doc.Find("iframe")
   iframes.Each(func(i int, ele *goquery.Selection) {
