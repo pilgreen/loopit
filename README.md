@@ -1,7 +1,7 @@
 # loopit
 A GO program to loop structured data through the template engine
 
-This is a command-line program that pushes a CSV or JSON file through the "text/template" package and echo the results to Stdout. 
+This is a command-line program that pushes a CSV or JSON file through the "text/template" package and prints the results to Stdout. 
 
 Example usage:
 
@@ -14,7 +14,7 @@ loopit [options] [path/to/]template.html
 
 #### -data file|url
 
-The data flag will accept a file path on the system or a url to a CSV or JSON file. The program will first determine the appropriate file type by extension and then make a map of the file data to pass to the template.
+The data flag will accept a file path on the system or a url to a CSV or JSON file. Loopit will first determine the appropriate file type by extension and then make a map of the file data to pass to the template.
 
 In the case of a CSV file, loopit will create an object for each row using the first row as the keys for each object. Therefore, the file needs to have a header row with column names that can be used in the dot notation of the "text/template" pacakge. As a general rule stick to single words without punctuation and you should be fine.
 
