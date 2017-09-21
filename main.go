@@ -6,8 +6,6 @@ import (
   "flag"
   "io/ioutil"
   "os"
-  "path"
-  "path/filepath"
   "regexp"
   "text/template"
 
@@ -29,7 +27,7 @@ func main() {
   flag.BoolVar(&Config.Shim, "shim", false, "shims content using goquery")
   flag.Parse()
 
-  var tmp = flag.Arg(0)
+  var tmpls = flag.Args()
   var data interface{}
 
   if len(Config.DataFile) > 0 {
@@ -63,14 +61,12 @@ func main() {
     }
   }
 
-  files, err := filepath.Glob(tmp)
-  funcs.Check(err)
-
-  if len(files) > 0 {
+  if len(tmpls) > 0 {
     var src bytes.Buffer
 
-    templates := template.Must(template.New("").Funcs(funcs.FuncMap).ParseGlob(tmp))
-    err := templates.ExecuteTemplate(&src, path.Base(files[0]), data)
+    tmp := template.New(tmpls[0]).Funcs(funcs.FuncMap)
+    templates := template.Must(tmp.ParseFiles(tmpls...))
+    err := templates.Execute(&src, data)
     funcs.Check(err)
 
     if Config.Shim {
@@ -82,5 +78,6 @@ func main() {
     b, err := json.Marshal(data)
     funcs.Check(err)
     os.Stdout.Write(b)
+    os.Stdout.WriteString("\n")
   }
 }

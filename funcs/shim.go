@@ -13,10 +13,16 @@ func Shim(in bytes.Buffer) (out bytes.Buffer, err error) {
   shims := doc.Find("[shim]")
   shims.Each(func(i int, ele *goquery.Selection) {
     query, _ := ele.Attr("shim")
+    placement, _ := ele.Attr("placement")
 
     if len(query) > 0 {
       target := doc.Find(query)
-      target.BeforeSelection(ele)
+
+      if placement == "after" {
+        target.AfterSelection(ele)
+      } else {
+        target.BeforeSelection(ele)
+      }
     } else {
       ele.Remove()
     }
