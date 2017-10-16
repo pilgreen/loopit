@@ -1,16 +1,20 @@
 package funcs
 
 import (
+  "bytes"
   "encoding/csv"
-  "io"
 )
 
-func ParseCSV(s io.Reader) []interface{} {
-  reader := csv.NewReader(s)
-  fc, err := reader.ReadAll()
-  Check(err)
-
+func ParseCSV(b []byte) ([]interface{}, error) {
   var data []interface{}
+  reader := bytes.NewReader(b)
+
+  csvReader := csv.NewReader(reader)
+  fc, err := csvReader.ReadAll()
+  if err != nil {
+    return data, err
+  }
+
   header := fc[0]
   for _, row := range fc[1:] {
     obj := make(map[string]interface{}, len(header))
@@ -20,5 +24,6 @@ func ParseCSV(s io.Reader) []interface{} {
     }
     data = append(data, obj)
   }
-  return data
+
+  return data, nil
 }

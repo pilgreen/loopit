@@ -4,9 +4,9 @@ import (
   "bytes"
   "encoding/json"
   "flag"
+  "io"
   "io/ioutil"
   "os"
-  "regexp"
   "text/template"
 
   // Local packages
@@ -29,36 +29,28 @@ func main() {
 
   var tmpls = flag.Args()
   var data interface{}
+  var reader io.Reader
 
-  if len(Config.DataFile) > 0 {
-    matchCSV, err := regexp.MatchString("\\.csv$", Config.DataFile)
-    funcs.Check(err)
+  // check for data piped to input
+  fi, err := os.Stdin.Stat()
+  funcs.Check(err)
 
-    if matchCSV {
-      if funcs.IsUrl(Config.DataFile) {
-        data = funcs.ParseCSV(funcs.OpenRemote(Config.DataFile))
-      } else {
-        data = funcs.ParseCSV(funcs.OpenLocal(Config.DataFile))
-      }
+  if(fi.Mode() & os.ModeNamedPipe != 0) {
+    reader = os.Stdin
+  } else if len(Config.DataFile) > 0 {
+    if(funcs.IsUrl(Config.DataFile)) {
+      reader = funcs.OpenRemote(Config.DataFile)
+    } else {
+      reader = funcs.OpenLocal(Config.DataFile)
     }
+  }
 
-    matchJSON, err := regexp.MatchString("\\.json$", Config.DataFile)
-    funcs.Check(err)
+  b, err := ioutil.ReadAll(reader)
+  funcs.Check(err)
 
-    if matchJSON {
-      var fc []byte
-      var err error
-
-      if funcs.IsUrl(Config.DataFile) {
-        b := funcs.OpenRemote(Config.DataFile)
-        fc, err = ioutil.ReadAll(b)
-      } else {
-        fc, err = ioutil.ReadFile(Config.DataFile)
-      }
-
-      funcs.Check(err)
-      json.Unmarshal(fc, &data)
-    }
+  data, err = funcs.ParseCSV(b)
+  if err != nil {
+    json.Unmarshal(b, &data)
   }
 
   if len(tmpls) > 0 {
