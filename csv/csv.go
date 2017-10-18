@@ -1,11 +1,11 @@
-package funcs
+package csv
 
 import (
   "bytes"
   "encoding/csv"
 )
 
-func ParseCSV(b []byte) ([]interface{}, error) {
+func ConvertToInterface(b []byte) ([]interface{}, error) {
   var data []interface{}
   reader := bytes.NewReader(b)
 

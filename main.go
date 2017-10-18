@@ -4,18 +4,26 @@ import (
   "bytes"
   "encoding/json"
   "flag"
+  "fmt"
   "io"
   "io/ioutil"
   "os"
-  "text/template"
 
   // Local packages
-  "github.com/pilgreen/loopit/funcs"
+  "github.com/pilgreen/loopit/template"
+  "github.com/pilgreen/loopit/csv"
 )
 
 var Config struct {
   DataFile string
   Shim bool
+}
+
+func check(e error) {
+  if e != nil {
+    fmt.Fprintln(os.Stderr, e)
+    os.Exit(1)
+  }
 }
 
 /**
@@ -33,42 +41,43 @@ func main() {
 
   // check for data piped to input
   fi, err := os.Stdin.Stat()
-  funcs.Check(err)
+  check(err)
 
   if(fi.Mode() & os.ModeNamedPipe != 0) {
     reader = os.Stdin
   } else if len(Config.DataFile) > 0 {
-    if(funcs.IsUrl(Config.DataFile)) {
-      reader = funcs.OpenRemote(Config.DataFile)
+    if(template.IsUrl(Config.DataFile)) {
+      reader = template.OpenRemote(Config.DataFile)
     } else {
-      reader = funcs.OpenLocal(Config.DataFile)
+      reader = template.OpenLocal(Config.DataFile)
     }
   }
 
-  b, err := ioutil.ReadAll(reader)
-  funcs.Check(err)
+  if reader != nil {
+    b, err := ioutil.ReadAll(reader)
+    check(err)
 
-  data, err = funcs.ParseCSV(b)
-  if err != nil {
-    json.Unmarshal(b, &data)
+    data, err = csv.ConvertToInterface(b)
+    if err != nil {
+      json.Unmarshal(b, &data)
+    }
   }
 
   if len(tmpls) > 0 {
     var src bytes.Buffer
 
-    tmp := template.New(tmpls[0]).Funcs(funcs.FuncMap)
-    templates := template.Must(tmp.ParseFiles(tmpls...))
-    err := templates.Execute(&src, data)
-    funcs.Check(err)
+    tmpl := template.ParseFiles(tmpls...)
+    err := tmpl.Execute(&src, data)
+    check(err)
 
     if Config.Shim {
-      src, err = funcs.Shim(src)
+      src, err = template.Shim(src)
     }
 
     src.WriteTo(os.Stdout)
   } else {
     b, err := json.Marshal(data)
-    funcs.Check(err)
+    check(err)
     os.Stdout.Write(b)
     os.Stdout.WriteString("\n")
   }

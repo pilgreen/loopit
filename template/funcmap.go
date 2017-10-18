@@ -1,4 +1,4 @@
-package funcs
+package template
 
 import (
   "bytes"
@@ -48,7 +48,7 @@ func StringifyFile(name string) string {
     fc, err = ioutil.ReadFile(name)
   }
 
-  Check(err)
+  check(err)
   return bytes.NewBuffer(fc).String()
 }
 
@@ -81,7 +81,7 @@ func Markdown(s string) string {
 
 func Ampify(s string) (string, error) {
   doc, err := goquery.NewDocumentFromReader(strings.NewReader(s))
-  Check(err)
+  check(err)
 
   iframes := doc.Find("iframe")
   iframes.Each(func(i int, ele *goquery.Selection) {

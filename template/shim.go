@@ -1,4 +1,4 @@
-package funcs
+package template
 
 import (
   "bytes"
@@ -8,7 +8,7 @@ import (
 func Shim(in bytes.Buffer) (out bytes.Buffer, err error) {
   reader := bytes.NewReader(in.Bytes())
   doc, err := goquery.NewDocumentFromReader(reader)
-  Check(err)
+  check(err)
 
   shims := doc.Find("[shim]")
   shims.Each(func(i int, ele *goquery.Selection) {
@@ -29,7 +29,7 @@ func Shim(in bytes.Buffer) (out bytes.Buffer, err error) {
   })
 
   html, err := doc.Html()
-  Check(err)
+  check(err)
 
   out.WriteString(html)
   return
