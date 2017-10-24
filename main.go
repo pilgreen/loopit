@@ -9,6 +9,10 @@ import (
   "io/ioutil"
   "os"
 
+  // Remote packages
+  "github.com/tdewolff/minify"
+  "github.com/tdewolff/minify/html"
+
   // Local packages
   "github.com/pilgreen/loopit/template"
   "github.com/pilgreen/loopit/csv"
@@ -17,6 +21,7 @@ import (
 var Config struct {
   DataFile string
   Shim bool
+  Minify bool
 }
 
 func check(e error) {
@@ -33,6 +38,7 @@ func check(e error) {
 func main() {
   flag.StringVar(&Config.DataFile, "data", "", "path or url to a JSON or CSV file")
   flag.BoolVar(&Config.Shim, "shim", false, "shims content using goquery")
+  flag.BoolVar(&Config.Minify, "minify", false, "minifies html code")
   flag.Parse()
 
   var tmpls = flag.Args()
@@ -43,14 +49,14 @@ func main() {
   fi, err := os.Stdin.Stat()
   check(err)
 
-  if(fi.Mode() & os.ModeNamedPipe != 0) {
-    reader = os.Stdin
-  } else if len(Config.DataFile) > 0 {
+  if len(Config.DataFile) > 0 {
     if(template.IsUrl(Config.DataFile)) {
       reader = template.OpenRemote(Config.DataFile)
     } else {
       reader = template.OpenLocal(Config.DataFile)
     }
+  } else if fi.Mode() & os.ModeNamedPipe != 0 {
+    reader = os.Stdin
   }
 
   if reader != nil {
@@ -72,6 +78,17 @@ func main() {
 
     if Config.Shim {
       src, err = template.Shim(src)
+    }
+
+    if Config.Minify {
+      minifier := minify.New()
+      minifier.AddFunc("text/html", html.Minify)
+
+      m, err := minifier.Bytes("text/html", src.Bytes())
+      check(err)
+
+      src.Reset()
+      src.Write(m)
     }
 
     src.WriteTo(os.Stdout)
