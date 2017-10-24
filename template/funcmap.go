@@ -6,6 +6,7 @@ import (
   "io/ioutil"
   "strings"
   "text/template"
+  "time"
 
   "github.com/PuerkitoBio/goquery"
   "github.com/russross/blackfriday"
@@ -17,11 +18,14 @@ import (
 
 var FuncMap = template.FuncMap {
   "ampify": Ampify,
+  "dateFormat": DateFormat,
   "file": StringifyFile,
+  "int": Int,
   "minify": MinifyCode,
   "markdown": Markdown,
   "slice": Slice,
   "shim": Shim,
+  "sort": Sort,
 }
 
 /**
@@ -94,4 +98,21 @@ func Ampify(s string) (string, error) {
     }
   })
   return doc.Find("body").Html()
+}
+
+/**
+ * Converts float64 to an int (for comparison)
+ */
+
+func Int(n float64) int {
+  return int(n)
+}
+
+/**
+ * Passes an RFC3339 formatted date string through the default parser
+ */
+
+func DateFormat(date string, layout string, format string) string {
+  t, _ := time.Parse(layout, date)
+  return t.Format(format)
 }
