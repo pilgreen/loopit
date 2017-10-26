@@ -1,4 +1,4 @@
-package template
+package tpl
 
 import (
   "bytes"
@@ -7,6 +7,8 @@ import (
   "strings"
   "text/template"
   "time"
+
+  "github.com/pilgreen/loopit/tpl/collections"
 
   "github.com/PuerkitoBio/goquery"
   "github.com/russross/blackfriday"
@@ -20,12 +22,13 @@ var FuncMap = template.FuncMap {
   "ampify": Ampify,
   "dateFormat": DateFormat,
   "file": StringifyFile,
+  "find": collections.Find,
   "int": Int,
   "minify": MinifyCode,
   "markdown": Markdown,
   "slice": Slice,
   "shim": Shim,
-  "sort": Sort,
+  "sort": collections.Sort,
 }
 
 /**

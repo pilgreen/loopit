@@ -1,5 +1,0 @@
-package template
-
-import (
-  "sort"
-)

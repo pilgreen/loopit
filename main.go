@@ -14,7 +14,7 @@ import (
   "github.com/tdewolff/minify/html"
 
   // Local packages
-  "github.com/pilgreen/loopit/template"
+  "github.com/pilgreen/loopit/tpl"
   "github.com/pilgreen/loopit/csv"
 )
 
@@ -50,10 +50,10 @@ func main() {
   check(err)
 
   if len(Config.DataFile) > 0 {
-    if(template.IsUrl(Config.DataFile)) {
-      reader = template.OpenRemote(Config.DataFile)
+    if(tpl.IsUrl(Config.DataFile)) {
+      reader = tpl.OpenRemote(Config.DataFile)
     } else {
-      reader = template.OpenLocal(Config.DataFile)
+      reader = tpl.OpenLocal(Config.DataFile)
     }
   } else if fi.Mode() & os.ModeNamedPipe != 0 {
     reader = os.Stdin
@@ -72,12 +72,12 @@ func main() {
   if len(tmpls) > 0 {
     var src bytes.Buffer
 
-    tmpl := template.ParseFiles(tmpls...)
+    tmpl := tpl.ParseFiles(tmpls...)
     err := tmpl.Execute(&src, data)
     check(err)
 
     if Config.Shim {
-      src, err = template.Shim(src)
+      src, err = tpl.Shim(src)
     }
 
     if Config.Minify {

@@ -1,4 +1,4 @@
-package template
+package tpl
 
 import (
   "fmt"
@@ -7,13 +7,12 @@ import (
   "net/url"
   "os"
   "path"
-
-  gotemplate "text/template"
+  "text/template"
 )
 
-func ParseFiles(filenames ...string) *gotemplate.Template {
-  tmp := gotemplate.New(path.Base(filenames[0])).Funcs(FuncMap)
-  return gotemplate.Must(tmp.ParseFiles(filenames...))
+func ParseFiles(filenames ...string) *template.Template {
+  tmp := template.New(path.Base(filenames[0])).Funcs(FuncMap)
+  return template.Must(tmp.ParseFiles(filenames...))
 }
 
 func check(e error) {
