@@ -2,10 +2,17 @@ package collections
 
 import (
   "reflect"
+
+  // "fmt"
+  // "os"
 )
 
-func Find(seq interface{}, path string, comp interface{}) interface{} {
+func Find(seq interface{}, path string, args ...interface{}) interface{} {
   seqv := reflect.ValueOf(seq)
+  comp, val := processFindArgs(args)
+
+  // fmt.Println(comp, val)
+  // os.Exit(1)
 
   switch seqv.Kind() {
   case reflect.Array, reflect.Slice:
@@ -13,14 +20,35 @@ func Find(seq interface{}, path string, comp interface{}) interface{} {
       obj := seqv.Index(i)
 
       iv := PathValue(obj, path)
-      jv := reflect.ValueOf(comp)
+      jv := reflect.ValueOf(val)
 
       left, right := compareFloat(iv, jv)
-      if left == right {
-        return obj.Interface()
+
+      switch comp {
+      case "!=":
+        if left != right {
+          return obj.Interface()
+        }
+      default:
+        if left == right {
+          return obj.Interface()
+        }
       }
     }
   }
 
   return nil
+}
+
+func processFindArgs(args []interface{}) (comp, val interface{}) {
+  switch len(args) {
+  case 1:
+    comp = ""
+    val = args[0]
+  case 2:
+    comp = args[0]
+    val = args[1]
+  }
+
+  return comp, val
 }
