@@ -9,6 +9,7 @@ import (
   "time"
 
   "github.com/pilgreen/loopit/tpl/collections"
+  "github.com/pilgreen/loopit/tpl/conversions"
 
   "github.com/PuerkitoBio/goquery"
   "github.com/russross/blackfriday"
@@ -23,11 +24,11 @@ var FuncMap = template.FuncMap {
   "dateFormat": DateFormat,
   "file": StringifyFile,
   "find": collections.Find,
+  "inchesToFeet": conversions.InchesToFeet,
   "int": Int,
   "minify": MinifyCode,
   "markdown": Markdown,
   "slice": Slice,
-  "shim": Shim,
   "sort": collections.Sort,
 }
 

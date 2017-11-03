@@ -16,6 +16,11 @@ func compareFloat(a reflect.Value, b reflect.Value) (float64, float64) {
 		left = float64(a.Int())
 	case reflect.Float32, reflect.Float64:
 		left = a.Float()
+  case reflect.Bool:
+    left = float64(0)
+    if a.Bool() == true {
+      left = float64(1)
+    }
 	case reflect.String:
 		var err error
 		left, err = strconv.ParseFloat(a.String(), 64)
@@ -32,6 +37,11 @@ func compareFloat(a reflect.Value, b reflect.Value) (float64, float64) {
 		right = float64(b.Int())
 	case reflect.Float32, reflect.Float64:
 		right = b.Float()
+  case reflect.Bool:
+    right = float64(0)
+    if b.Bool() == true {
+      right = float64(1)
+    }
 	case reflect.String:
 		var err error
 		right, err = strconv.ParseFloat(b.String(), 64)

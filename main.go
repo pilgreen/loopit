@@ -18,10 +18,13 @@ import (
   "github.com/pilgreen/loopit/csv"
 )
 
+var version = "0.3.0"
+
 var Config struct {
   DataFile string
   Shim bool
   Minify bool
+  Version bool
 }
 
 func check(e error) {
@@ -39,11 +42,18 @@ func main() {
   flag.StringVar(&Config.DataFile, "data", "", "path or url to a JSON or CSV file")
   flag.BoolVar(&Config.Shim, "shim", false, "shims content using goquery")
   flag.BoolVar(&Config.Minify, "minify", false, "minifies html code")
+  flag.BoolVar(&Config.Version, "v", false, "print version info")
   flag.Parse()
 
   var tmpls = flag.Args()
   var data interface{}
   var reader io.Reader
+
+  // check for version flag
+  if Config.Version == true {
+    fmt.Println(version)
+    os.Exit(1)
+  }
 
   // check for data piped to input
   fi, err := os.Stdin.Stat()

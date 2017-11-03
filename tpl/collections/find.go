@@ -2,17 +2,11 @@ package collections
 
 import (
   "reflect"
-
-  // "fmt"
-  // "os"
 )
 
 func Find(seq interface{}, path string, args ...interface{}) interface{} {
   seqv := reflect.ValueOf(seq)
   comp, val := processFindArgs(args)
-
-  // fmt.Println(comp, val)
-  // os.Exit(1)
 
   switch seqv.Kind() {
   case reflect.Array, reflect.Slice:
