@@ -134,6 +134,4 @@ or
 
 ```
 {{ range sort .people "age" "desc" }} ... {{ end }}
-
-
-
+```
