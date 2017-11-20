@@ -73,9 +73,11 @@ func main() {
     b, err := ioutil.ReadAll(reader)
     check(err)
 
-    data, err = csv.ConvertToInterface(b)
-    if err != nil {
-      json.Unmarshal(b, &data)
+    if len(b) > 0 {
+      data, err = csv.ConvertToInterface(b)
+      if err != nil {
+        json.Unmarshal(b, &data)
+      }
     }
   }
 
