@@ -50,10 +50,12 @@ The Go template package is very basic, but also extendable. Below are custom fun
 
 This function parses a date using the `time` package and returns a formatted version of your choosing. The Golang [time](https://golang.org/pkg/time/) package is kind of odd, but also very flexible. Make sure to read the documentation fully before working with this. 
 
-The first parameter is the date string to parse, the second is a representation of that date mapped to 'Mon Jan 2 15:04:05 MST 2006' and the third is the desired output format mapped to 'Mon Jan 2 15:04:05 MST 2006'.
+The first parameter is the date string to parse, the second is a representation of that date mapped to 'Mon Jan 2 15:04:05 MST 2006' and the third is the desired output format mapped to 'Mon Jan 2 15:04:05 MST 2006'. 
+
+The fourth parameter is optional, and allows you to alter the Timezone using the time.LoadLocation() function.
 
 ```
-{{ dateFormat "2017/11/2" "2006/01/02" "Jan 2" }}
+{{ dateFormat "2017/11/2" "2006/01/02" "Jan 2" "America/Chicago" }}
 ```
 
 #### file
