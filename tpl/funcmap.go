@@ -20,6 +20,7 @@ import (
 )
 
 var FuncMap = template.FuncMap {
+  "add": Add,
   "ampify": Ampify,
   "dateFormat": DateFormat,
   "file": StringifyFile,
@@ -30,6 +31,7 @@ var FuncMap = template.FuncMap {
   "markdown": Markdown,
   "slice": Slice,
   "sort": collections.Sort,
+  "subtract": Subtract,
 }
 
 /**
@@ -114,9 +116,33 @@ func Int(n float64) int {
 
 /**
  * Passes an RFC3339 formatted date string through the default parser
+ * Order of arguments: layout, format, timezone
  */
 
-func DateFormat(date string, layout string, format string) string {
-  t, _ := time.Parse(layout, date)
-  return t.Format(format)
+func DateFormat(date string, args ...string) string {
+  t, err := time.Parse(args[0], date)
+  if err != nil {
+    return date
+  }
+
+  if len(args) > 2 {
+    loc, err := time.LoadLocation(args[2])
+    if err != nil {
+      return date
+    }
+    return t.In(loc).Format(args[1])
+  }
+  return t.Format(args[1])
+}
+
+/**
+ * Adds to a number
+ */
+
+func Add(add int, initial int) int {
+  return initial + add
+}
+
+func Subtract(sub int, initial int) int {
+  return initial - sub
 }
