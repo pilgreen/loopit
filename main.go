@@ -18,7 +18,7 @@ import (
   "github.com/pilgreen/loopit/csv"
 )
 
-var version = "0.3.0"
+var version = "0.3.3"
 
 var Config struct {
   DataFile string
