@@ -29,6 +29,7 @@ var FuncMap = template.FuncMap {
   "int": Int,
   "minify": MinifyCode,
   "markdown": Markdown,
+  "replace": Replace,
   "slice": Slice,
   "sort": collections.Sort,
   "subtract": Subtract,
@@ -145,4 +146,12 @@ func Add(add int, initial int) int {
 
 func Subtract(sub int, initial int) int {
   return initial - sub
+}
+
+/**
+ * Replace a portion of a string
+ */
+
+func Replace(from, to, input string) string {
+  return strings.Replace(input, from, to, -1)
 }

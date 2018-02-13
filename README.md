@@ -46,6 +46,14 @@ Prints the version.
 
 The Go template package is very basic, but also extendable. Below are custom functions that are available to the template based solely on need so far. Several of these are borrowed from [Hugo](https://gohugo.io/). 
 
+#### add
+
+Adds an int to an int.
+
+```
+{{ add 1 $index }}
+```
+
 #### dateFormat
 
 This function parses a date using the `time` package and returns a formatted version of your choosing. The Golang [time](https://golang.org/pkg/time/) package is kind of odd, but also very flexible. Make sure to read the documentation fully before working with this. 
@@ -116,6 +124,14 @@ This function sends the string through the `blackfriday.MarkdownCommon()` functi
 {{ file "./contents.md" | markdown }}
 ```
 
+#### replace
+
+Passes a string through the `strings.Replace` function.
+
+```
+{{ replace "http" "https" .url }}
+```
+
 #### slice
 
 The slice function will let you pull a subset of data. For example, to range over the first five rows of a csv file use the following code.
@@ -136,4 +152,12 @@ or
 
 ```
 {{ range sort .people "age" "desc" }} ... {{ end }}
+```
+
+#### subtract
+
+Subtracts an int from an int.
+
+```
+{{ subtract 1 $index }}
 ```
