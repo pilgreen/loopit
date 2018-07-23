@@ -21,6 +21,19 @@ In the case of a JSON file, loopit will pass the object or array straight throug
 
 *Loopit will also accept CSV and JSON data passed in through stdin if -data is ommitted.*
 
+#### -minify
+
+The minify flag will pass the output through the [tdewolff/minify](https://github.com/tdewolff/minify) package. Currently this only works for HTML output.
+
+#### -out filename
+
+Write the markup to a file instead of stdout. This uses `ioutil.WriteFile()` and replaces the file each time.
+
+#### -watch
+
+After the initial render, loopit will enter watch mode and re-run the render function any time a file changes. Loopit watches the parent folder for each template passed in, as well as the parent folder for structured data using the `-data` command-line option.
+
+
 #### -shim
 
 The shim flag is a boolean option. When added, loopit will use [goquery](https://github.com/PuerkitoBio/goquery) to move DOM around after the template has been parsed. This is useful when HTML is provided in a JSON object, but needs to be enhanced with ads or any other content. 
@@ -31,14 +44,9 @@ Here is an example that will inject an ad before the 3rd paragraph:
 <div shim="body p:nth-child(3)">[Ad code goes here]</div>
 ```
 
-#### -minify
-
-The minify flag will pass the output through the [tdewolff/minify](https://github.com/tdewolff/minify) package. Currently this only works for HTML output.
-
-#### -v
+#### -version
 
 Prints the version.
-
 
 
 

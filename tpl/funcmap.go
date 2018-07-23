@@ -27,12 +27,15 @@ var FuncMap = template.FuncMap {
   "find": collections.Find,
   "inchesToFeet": conversions.InchesToFeet,
   "int": Int,
+  "lower": ToLower,
   "minify": MinifyCode,
   "markdown": Markdown,
   "replace": Replace,
   "slice": Slice,
   "sort": collections.Sort,
   "subtract": Subtract,
+  "trim": Trim,
+  "upper": ToUpper,
 }
 
 /**
@@ -154,4 +157,25 @@ func Subtract(sub int, initial int) int {
 
 func Replace(from, to, input string) string {
   return strings.Replace(input, from, to, -1)
+}
+
+/**
+ * String conversions
+ */
+
+func ToLower(s string) string {
+  return strings.ToLower(s)
+}
+
+func ToUpper(s string) string {
+  return strings.ToUpper(s)
+}
+
+/**
+ * Trims characters from both sides
+ * Note: the cutset is required
+ */
+
+func Trim(cutset string, s string) string {
+  return strings.Trim(s, cutset)
 }

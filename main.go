@@ -8,8 +8,10 @@ import (
   "io"
   "io/ioutil"
   "os"
+  "path/filepath"
 
   // Remote packages
+  "github.com/fsnotify/fsnotify"
   "github.com/tdewolff/minify"
   "github.com/tdewolff/minify/html"
 
@@ -18,13 +20,15 @@ import (
   "github.com/pilgreen/loopit/csv"
 )
 
-var version = "0.3.3"
+var version = "0.5.0"
 
-var Config struct {
+type Config struct {
   DataFile string
-  Shim bool
   Minify bool
+  Output string
+  Shim bool
   Version bool
+  Watch bool
 }
 
 func check(e error) {
@@ -35,35 +39,22 @@ func check(e error) {
 }
 
 /**
- * Main function
+ * Render template
  */
 
-func main() {
-  flag.StringVar(&Config.DataFile, "data", "", "path or url to a JSON or CSV file")
-  flag.BoolVar(&Config.Shim, "shim", false, "shims content using goquery")
-  flag.BoolVar(&Config.Minify, "minify", false, "minifies html code")
-  flag.BoolVar(&Config.Version, "v", false, "print version info")
-  flag.Parse()
-
-  var tmpls = flag.Args()
+func Render(config Config, templates []string) {
   var data interface{}
   var reader io.Reader
-
-  // check for version flag
-  if Config.Version == true {
-    fmt.Println(version)
-    os.Exit(1)
-  }
 
   // check for data piped to input
   fi, err := os.Stdin.Stat()
   check(err)
 
-  if len(Config.DataFile) > 0 {
-    if(tpl.IsUrl(Config.DataFile)) {
-      reader = tpl.OpenRemote(Config.DataFile)
+  if len(config.DataFile) > 0 {
+    if(tpl.IsUrl(config.DataFile)) {
+      reader = tpl.OpenRemote(config.DataFile)
     } else {
-      reader = tpl.OpenLocal(Config.DataFile)
+      reader = tpl.OpenLocal(config.DataFile)
     }
   } else if fi.Mode() & os.ModeNamedPipe != 0 {
     reader = os.Stdin
@@ -81,18 +72,18 @@ func main() {
     }
   }
 
-  if len(tmpls) > 0 {
+  if len(templates) > 0 {
     var src bytes.Buffer
 
-    tmpl := tpl.ParseFiles(tmpls...)
+    tmpl := tpl.ParseFiles(templates...)
     err := tmpl.Execute(&src, data)
     check(err)
 
-    if Config.Shim {
+    if config.Shim {
       src, err = tpl.Shim(src)
     }
 
-    if Config.Minify {
+    if config.Minify {
       minifier := minify.New()
       minifier.AddFunc("text/html", html.Minify)
 
@@ -103,11 +94,66 @@ func main() {
       src.Write(m)
     }
 
-    src.WriteTo(os.Stdout)
-  } else {
-    b, err := json.Marshal(data)
+    if len(config.Output) > 0 {
+      ioutil.WriteFile(config.Output, src.Bytes(), 0644)
+    } else {
+      src.WriteTo(os.Stdout)
+    }
+  }
+}
+
+/**
+ * Main function
+ */
+
+func main() {
+  config := Config{}
+
+  flag.StringVar(&config.DataFile, "data", "", "path or url to a JSON or CSV file")
+  flag.BoolVar(&config.Minify, "minify", false, "minifies html code")
+  flag.StringVar(&config.Output, "out", "", "output file")
+  flag.BoolVar(&config.Shim, "shim", false, "shims content using goquery")
+  flag.BoolVar(&config.Version, "version", false, "print version info")
+  flag.BoolVar(&config.Watch, "watch", false, "runs loopit on file changes")
+  flag.Parse()
+
+  // check for version flag
+  if config.Version == true {
+    fmt.Println(version)
+    os.Exit(1)
+  }
+
+  var templates = flag.Args()
+
+  // Always run the initial render
+  Render(config, templates)
+
+  // Set up fsnotify to watch the directory
+  if config.Watch == true {
+    watcher, err := fsnotify.NewWatcher()
     check(err)
-    os.Stdout.Write(b)
-    os.Stdout.WriteString("\n")
+    defer watcher.Close()
+
+    done := make(chan bool)
+    go func() {
+      for {
+        select {
+        case <-watcher.Events:
+          Render(config, templates)
+        case err := <-watcher.Errors:
+          fmt.Fprintln(os.Stderr, err)
+        }
+      }
+    }()
+
+    for _, v := range templates {
+      watcher.Add(filepath.Dir(v));
+    }
+
+    if len(config.DataFile) > 0 && !tpl.IsUrl(config.DataFile) {
+      watcher.Add(filepath.Dir(config.DataFile));
+    }
+
+    <-done
   }
 }
