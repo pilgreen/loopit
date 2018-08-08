@@ -138,8 +138,10 @@ func main() {
     go func() {
       for {
         select {
-        case <-watcher.Events:
-          Render(config, templates)
+        case e := <-watcher.Events:
+          if e.Op.String() == "WRITE" {
+            Render(config, templates)
+          }
         case err := <-watcher.Errors:
           fmt.Fprintln(os.Stderr, err)
         }
