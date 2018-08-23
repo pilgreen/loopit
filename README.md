@@ -11,7 +11,7 @@ loopit [options] template.html [...template.html]
 
 ## Command-Line Options
 
-#### -data file|url
+#### -d file|url
 
 The data flag will accept a file path on the system or a url to a CSV or JSON file. Loopit will make a map of the file data and pass it to the template.
 
@@ -21,17 +21,21 @@ In the case of a JSON file, loopit will pass the object or array straight throug
 
 *Loopit will also accept CSV and JSON data passed in through stdin if -data is ommitted.*
 
+#### -markdown
+
+The markdown flag passes the output through the [russross/blackfriday](https://github.com/russross/blackfriday) package.
+
 #### -minify
 
 The minify flag will pass the output through the [tdewolff/minify](https://github.com/tdewolff/minify) package. Currently this only works for HTML output.
 
-#### -out filename
+#### -o filename
 
 Write the markup to a file instead of stdout. This uses `ioutil.WriteFile()` and replaces the file each time.
 
-#### -watch
+#### -w string
 
-After the initial render, loopit will enter watch mode and re-run the render function any time a file changes. Loopit watches the parent folder for each template passed in, as well as the parent folder for structured data using the `-data` command-line option.
+After the initial render, loopit will enter watch mode and re-run the render function any time a file is written. Loopit uses the Glob() function to add any number of files or directories.
 
 
 #### -shim
@@ -44,7 +48,7 @@ Here is an example that will inject an ad before the 3rd paragraph:
 <div shim="body p:nth-child(3)">[Ad code goes here]</div>
 ```
 
-#### -version
+#### -v
 
 Prints the version.
 
