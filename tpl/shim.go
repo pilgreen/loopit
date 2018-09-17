@@ -8,15 +8,17 @@ import (
 func Shim(in bytes.Buffer) (out bytes.Buffer, err error) {
   reader := bytes.NewReader(in.Bytes())
   doc, err := goquery.NewDocumentFromReader(reader)
-  check(err)
+  if err != nil { return }
 
   shims := doc.Find("[shim]")
   shims.Each(func(i int, ele *goquery.Selection) {
-    query, _ := ele.Attr("shim")
     placement, _ := ele.Attr("placement")
+    query, _ := ele.Attr("shim")
+    target := doc.Find(query)
 
-    if len(query) > 0 {
-      target := doc.Find(query)
+    if target.Length() > 0 {
+      // Clean up and place
+      ele.RemoveAttr("shim")
 
       if placement == "after" {
         target.AfterSelection(ele)
@@ -24,6 +26,7 @@ func Shim(in bytes.Buffer) (out bytes.Buffer, err error) {
         target.BeforeSelection(ele)
       }
     } else {
+      // New home doesn't exist
       ele.Remove()
     }
   })

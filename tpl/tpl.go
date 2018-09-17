@@ -8,12 +8,16 @@ import (
   "os"
   "path"
   "text/template"
+
+  "github.com/pilgreen/loopit/tpl/strings"
+  "github.com/pilgreen/loopit/tpl/collections"
+  "github.com/pilgreen/loopit/tpl/partial"
+  "github.com/pilgreen/loopit/tpl/scratch"
 )
 
-func ParseFiles(filenames ...string) *template.Template {
-  tmp := template.New(path.Base(filenames[0])).Funcs(FuncMap)
-  return template.Must(tmp.ParseFiles(filenames...))
-}
+/**
+* Simple error checker
+*/
 
 func check(e error) {
   if e != nil {
@@ -22,13 +26,23 @@ func check(e error) {
   }
 }
 
-func IsUrl(s string) bool {
-  _, err := url.ParseRequestURI(s);
-  if err != nil {
-    return false
-  }
-  return true
+/**
+* Appends package template functions
+*/
+
+func ParseFiles(filenames ...string) *template.Template {
+  tmpl := template.New(path.Base(filenames[0]))
+  tmpl.Funcs(strings.FuncMap)
+  tmpl.Funcs(collections.FuncMap)
+  tmpl.Funcs(partial.FuncMap)
+  tmpl.Funcs(scratch.FuncMap)
+
+  return template.Must(tmpl.ParseFiles(filenames...))
 }
+
+/**
+* Remote/Local files
+*/
 
 func OpenRemote(s string) io.ReadCloser {
   resp, err := http.Get(s)
@@ -41,3 +55,16 @@ func OpenLocal(s string) *os.File {
   check(err)
   return file
 }
+
+/**
+* Simple URL check for convenience
+*/
+
+func IsUrl(s string) bool {
+  _, err := url.ParseRequestURI(s);
+  if err != nil {
+    return false
+  }
+  return true
+}
+

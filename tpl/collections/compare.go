@@ -5,7 +5,7 @@ import (
   "strconv"
 )
 
-func compareFloat(a reflect.Value, b reflect.Value) (float64, float64) {
+func compare(a reflect.Value, b reflect.Value) (float64, float64) {
 	var left, right float64
 	var leftStr, rightStr *string
 

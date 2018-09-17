@@ -7,21 +7,24 @@ import (
   "fmt"
   "io"
   "io/ioutil"
+  "net/http"
   "os"
   "path/filepath"
+  "regexp"
 
   // Remote packages
   "github.com/fsnotify/fsnotify"
   "github.com/russross/blackfriday"
   "github.com/tdewolff/minify"
   "github.com/tdewolff/minify/html"
+  "github.com/yosssi/gohtml"
 
   // Local packages
   "github.com/pilgreen/loopit/tpl"
   "github.com/pilgreen/loopit/csv"
 )
 
-var version = "0.6.0"
+var version = "0.7.0"
 
 type Config struct {
   DataFile string
@@ -29,8 +32,9 @@ type Config struct {
   Markdown bool
   Output string
   Shim bool
+  Tidy bool
   Version bool
-  Watch string
+  Watch bool
 }
 
 func check(e error) {
@@ -103,6 +107,13 @@ func Render(config Config, templates []string) {
       src.Write(m)
     }
 
+    if config.Tidy {
+      gohtml.Condense = true
+      t := gohtml.FormatBytes(src.Bytes())
+      src.Reset()
+      src.Write(t)
+    }
+
     if len(config.Output) > 0 {
       ioutil.WriteFile(config.Output, src.Bytes(), 0644)
     } else {
@@ -118,13 +129,14 @@ func Render(config Config, templates []string) {
 func main() {
   config := Config{}
 
-  flag.StringVar(&config.DataFile, "d", "", "path or url to a JSON or CSV file")
+  flag.StringVar(&config.DataFile, "data", "", "path or url to a JSON or CSV file")
   flag.BoolVar(&config.Markdown, "markdown", false, "run output through BlackFriday")
   flag.BoolVar(&config.Minify, "minify", false, "minifies html code")
-  flag.StringVar(&config.Output, "o", "", "output file")
+  flag.StringVar(&config.Output, "out", "", "output file")
   flag.BoolVar(&config.Shim, "shim", false, "shims content using goquery")
-  flag.BoolVar(&config.Version, "v", false, "version info")
-  flag.StringVar(&config.Watch, "w", "", "glob pattern to watch for changes")
+  flag.BoolVar(&config.Tidy, "tidy", false, "cleanup the output")
+  flag.BoolVar(&config.Version, "version", false, "version info")
+  flag.BoolVar(&config.Watch, "watch", false, "rebuilds on file changes and starts a server at :1313")
   flag.Parse()
 
   // check for version flag
@@ -139,7 +151,7 @@ func main() {
   Render(config, templates)
 
   // Set up fsnotify to watch the directory
-  if len(config.Watch) > 0 {
+  if config.Watch == true {
     watcher, err := fsnotify.NewWatcher()
     check(err)
     defer watcher.Close()
@@ -158,12 +170,31 @@ func main() {
       }
     }()
 
-    files, err := filepath.Glob(config.Watch)
-    check(err)
-
-    for _, v := range files {
-      watcher.Add(v);
+    // watch template files
+    for _, t := range templates {
+      watcher.Add(t);
     }
+
+    // also watch css and js files
+    css := regexp.MustCompile(".*\\.css$")
+    js := regexp.MustCompile(".*\\.js$")
+
+    filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
+      name := info.Name()
+      if css.MatchString(name) || js.MatchString(name) {
+        watcher.Add(path)
+      }
+      return nil
+    })
+
+
+    // start the server
+    if len(config.Output) > 0 {
+      fmt.Println("Server started at http://localhost:1313")
+    }
+
+    dir, _ := os.Getwd()
+    http.ListenAndServe(":1313", http.FileServer(http.Dir(dir)))
 
     <-done
   }
