@@ -1,7 +1,6 @@
 # loopit
-A GO program to loop structured data through the template engine
 
-This is a command-line program that pipes a CSV or JSON file through the "text/template" package and prints the results to Stdout. 
+A GO program to loop structured data through the template engine. This is a command-line program that pipes a CSV or JSON file through the "text/template" package and prints the results to Stdout. If you need to make a full blown website or blog, and have stubmled onto this page, I highly recommend using [Hugo](https://gohugo.io/) instead. I often have to make small snippets of data-based code, portions of a page, or single pages in multiple environments. With these type of projects, the file structure required by Hugo sometimes prevents me from using it.
 
 Example usage:
 
@@ -178,12 +177,14 @@ Subtracts an int from an int.
 Trims characters and space from both sides of the string.
 
 ```
-{{ trim .link "/" }}
+{{ trim "/" .link }}
 ```
 
 ### unescape
 
-Runs a string through the url.QueryUnescape() function, which converts each 3-byte encoded substring of the form "%AB" into the hex-decoded byte 0xAB. Useful for urls in feeds. **Note: escape is already available in the Go Template package.**
+Runs a string through the url.QueryUnescape() function, which converts each 3-byte encoded substring of the form "%AB" into the hex-decoded byte 0xAB. Useful for urls in feeds. 
+
+**Note: escape is already available in the Go Template package.**
 
 ```
 {{ unescape .link }}
@@ -265,9 +266,9 @@ The default comparator is `==`, but you can use any of the following: `=, ==, eq
 
 ## Scratch
 
-This is a copy of a function from Hugo. The Go template package is intentionally dumb by design, but that doesn't always work when a JSON feed is created by a third party and time to publication is critical. Variable scope is very tight, so to loosen it up a bit you can use scratch. This lets you maintain global variables and alter them from within loops and conditionals.
+This is a copy of a concept from Hugo. The Go template package is intentionally dumb by design, but that doesn't always work when a JSON feed is created by a third party and time to publication is critical. Variable scope is very tight, so to loosen it up a bit you can use scratch. This lets you maintain global variables and alter them from within loops and conditionals.
 
-It works very much like local storage in the browser, with key/string pairings. There are three functions to get, set and delete a pairing.
+It works very much like local storage in the browser, with key/string pairings. There are three functions to get, set and delete a pairing. Unlike Hugo, only strings are supported.
 
 ```
 {{ $scratch := scratch }}
