@@ -8,7 +8,7 @@ Example usage:
 loopit [options] template.html [...template.html]
 ```
 
-# Command-Line Options
+# Command-Line options
 
 ### -data file|url
 
