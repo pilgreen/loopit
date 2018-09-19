@@ -1,6 +1,6 @@
 # loopit
 
-A GO program to loop structured data through the template engine. This is a command-line program that pipes a CSV or JSON file through the "text/template" package and prints the results to Stdout. If you need to make a full blown website or blog, and have stubmled onto this page, I highly recommend using [Hugo](https://gohugo.io/) instead. I often have to make small snippets of data-based code, portions of a page, or single pages in multiple environments. With these type of projects, the file structure required by Hugo sometimes prevents me from using it.
+A GO program to loop structured data through the template engine. This is a command-line program that pipes a CSV or JSON file through the "text/template" package and prints the results to Stdout. If you need to make a full blown website or blog, and have stumbled onto this page, I highly recommend using [Hugo](https://gohugo.io/) instead. I often have to make small snippets of data-based code, portions of a page, or single pages in multiple environments. With these type of projects, the file structure required by Hugo sometimes prevents me from using it.
 
 Example usage:
 
