@@ -300,4 +300,3 @@ Returns contents of a file as a string, but runs data through loopit and include
 ```
 {{ partial "./amp-components/amp-img.tmpl" .photo }}
 ```
-```
