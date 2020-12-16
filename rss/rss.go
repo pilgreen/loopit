@@ -34,7 +34,15 @@ type Item struct {
   Enclosure []ItemEnclosure `xml:"enclosure" json:"enclosure,omitempty"`
   Description string `xml:"description" json:"description,omitempty"`
   Author string `xml:"author" json:"author,omitempty"`
-  // Content and namespacing is messed up .. needs work to use it`
+  Media Media `xml:"http://search.yahoo.com/mrss/ content" json:"media,omitempty"`
+  Content string `xml:"http://purl.org/rss/1.0/modules/content encoded" json:"content"`
+}
+
+type Media struct {
+  Url string `xml:"url,attr" json:"url"`
+  Medium string `xml:"medium,attr" json:"medium"`
+  Credit string `xml:"credit" json:"credit"`
+  Description string `xml:"description" json:"description"`
 }
 
 func Unmarshal(b []byte, v interface{}) error {
