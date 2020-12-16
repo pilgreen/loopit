@@ -11,6 +11,7 @@ import (
   "os"
   "path/filepath"
   "regexp"
+  "strings"
 
   // Remote packages
   "github.com/fsnotify/fsnotify"
@@ -22,6 +23,7 @@ import (
   // Local packages
   "github.com/pilgreen/loopit/tpl"
   "github.com/pilgreen/loopit/csv"
+  "github.com/pilgreen/loopit/rss"
 )
 
 var version = "0.7.0"
@@ -35,6 +37,7 @@ type Config struct {
   Tidy bool
   Version bool
   Watch bool
+  Port string
 }
 
 func check(e error) {
@@ -52,10 +55,11 @@ func Render(config Config, templates []string) {
   var data interface{}
   var reader io.Reader
 
-  // check for data piped to input
+  // Check for data piped to input
   fi, err := os.Stdin.Stat()
   check(err)
 
+  // Figure out where the data is coming from
   if len(config.DataFile) > 0 {
     if(tpl.IsUrl(config.DataFile)) {
       reader = tpl.OpenRemote(config.DataFile)
@@ -66,14 +70,22 @@ func Render(config Config, templates []string) {
     reader = os.Stdin
   }
 
+  // Unmarshal the data: accepts json, csv, rss, atom
   if reader != nil {
     b, err := ioutil.ReadAll(reader)
     check(err)
 
-    if len(b) > 0 {
-      data, err = csv.ConvertToInterface(b)
-      if err != nil {
+    // See if we have an rss or atom feed
+    mime := http.DetectContentType(b)
+
+    if strings.Contains(mime, "text/xml") {
+      rss.Unmarshal(b, &data)
+    } else {
+      // JSON and XML come in as "text/plain"
+      if json.Valid(b) {
         json.Unmarshal(b, &data)
+      } else {
+        csv.Unmarshal(b, &data)
       }
     }
   }
@@ -81,8 +93,8 @@ func Render(config Config, templates []string) {
   if len(templates) > 0 {
     var src bytes.Buffer
 
-    tmpl := tpl.ParseFiles(templates...)
-    err := tmpl.Execute(&src, data)
+    template := tpl.ParseFiles(templates...)
+    err := template.Execute(&src, data)
     check(err)
 
     if config.Shim {
@@ -91,7 +103,6 @@ func Render(config Config, templates []string) {
 
     if config.Markdown {
       m := blackfriday.MarkdownCommon(src.Bytes())
-
       src.Reset()
       src.Write(m)
     }
@@ -119,7 +130,12 @@ func Render(config Config, templates []string) {
     } else {
       src.WriteTo(os.Stdout)
     }
+  } else {
+    // No template let's kick out the JSON for developing
+    b, _ := json.Marshal(data)
+    os.Stdout.Write(b)
   }
+
 }
 
 /**
@@ -136,7 +152,8 @@ func main() {
   flag.BoolVar(&config.Shim, "shim", false, "shims content using goquery")
   flag.BoolVar(&config.Tidy, "tidy", false, "cleanup the output")
   flag.BoolVar(&config.Version, "version", false, "version info")
-  flag.BoolVar(&config.Watch, "watch", false, "rebuilds on file changes and starts a server at :1313")
+  flag.BoolVar(&config.Watch, "watch", false, "rebuilds on file changes and starts a server (out flag required)")
+  flag.StringVar(&config.Port, "port", "1313", "port to use for the local server")
   flag.Parse()
 
   // check for version flag
@@ -151,7 +168,7 @@ func main() {
   Render(config, templates)
 
   // Set up fsnotify to watch the directory
-  if config.Watch == true {
+  if config.Watch == true && len(config.Output) > 0 {
     watcher, err := fsnotify.NewWatcher()
     check(err)
     defer watcher.Close()
@@ -187,14 +204,10 @@ func main() {
       return nil
     })
 
-
     // start the server
-    if len(config.Output) > 0 {
-      fmt.Println("Server started at http://localhost:1313")
-    }
-
     dir, _ := os.Getwd()
-    http.ListenAndServe(":1313", http.FileServer(http.Dir(dir)))
+    fmt.Printf("Server started at http://localhost:%s\n", config.Port)
+    http.ListenAndServe(fmt.Sprintf(":%s", config.Port), http.FileServer(http.Dir(dir)))
 
     <-done
   }

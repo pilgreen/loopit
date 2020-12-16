@@ -3,18 +3,19 @@ package csv
 import (
   "bytes"
   "encoding/csv"
+  "reflect"
 )
 
-func ConvertToInterface(b []byte) ([]interface{}, error) {
-  var data []interface{}
+func Unmarshal(b []byte, v interface{}) error {
   reader := bytes.NewReader(b)
-
   csvReader := csv.NewReader(reader)
+
   fc, err := csvReader.ReadAll()
   if err != nil {
-    return data, err
+    return err
   }
 
+  var data []interface{}
   header := fc[0]
   for _, row := range fc[1:] {
     obj := make(map[string]interface{}, len(header))
@@ -25,5 +26,8 @@ func ConvertToInterface(b []byte) ([]interface{}, error) {
     data = append(data, obj)
   }
 
-  return data, nil
+  rv := reflect.ValueOf(v).Elem()
+  rv.Set(reflect.ValueOf(data))
+
+  return nil
 }
