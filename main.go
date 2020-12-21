@@ -26,7 +26,7 @@ import (
   "github.com/pilgreen/loopit/rss"
 )
 
-var version = "0.7.0"
+var version = "0.8.0"
 
 type Config struct {
   DataFile string

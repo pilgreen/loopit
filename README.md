@@ -12,13 +12,15 @@ loopit [options] template.html [...template.html]
 
 ### -data file|url
 
-The data flag will accept a file path on the system or a url to a CSV or JSON file. Loopit will make a map of the file data and pass it to the template.
+The data flag will accept a file path on the system or a url to a CSV, JSON or RSS file. Loopit will make a map of the file data and pass it to the template.
 
 In the case of a CSV file, loopit will create an object for each row using the first row as the keys for each object. Therefore, the file needs to have a header row with column names that can be used in the dot notation of the "text/template" pacakge. As a general rule stick to single words without punctuation and you should be fine.
 
 In the case of a JSON file, loopit will pass the object or array straight through.
 
-*Loopit will also accept CSV and JSON data passed in through stdin if -data is ommitted.*
+In the case of an RSS file, loopit will convert most standard elements.
+
+*If you do not specify a template file, loopit will print the parsed data to sdout. It will also accept data piped in through stdin if -data is ommitted.*
 
 ### -markdown
 
