@@ -26,7 +26,7 @@ import (
   "github.com/pilgreen/loopit/rss"
 )
 
-var version = "0.8.0"
+var version = "0.8.1"
 
 type Config struct {
   DataFile string
@@ -66,7 +66,7 @@ func Render(config Config, templates []string) {
     } else {
       reader = tpl.OpenLocal(config.DataFile)
     }
-  } else if fi.Mode() & os.ModeNamedPipe != 0 {
+  } else if fi.Size() > 0 {
     reader = os.Stdin
   }
 

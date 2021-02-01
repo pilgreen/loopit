@@ -7,6 +7,11 @@ import(
 
 type RSS struct {
   Channel Channel `xml:"channel" json:"channel"`
+  BannerHTML string `xml:"bannerHtml" json:"bannerHtml,omitempty"`
+  ProfileViewHTML string `xml:"profileViewHtml" json:"profileViewHtml,omitempty"`
+  ItemsWithContentCount int `xml:"itemsWithContentCount" json:"itemsWithContent,omitempty"`
+  IsLinkContent bool `xml:"isLinkContent" json:"isLinkContent,omitempty"`
+  MessageType string  `xml:"messageType" json:"messageType,omitempty"`
 }
 
 type Channel struct {

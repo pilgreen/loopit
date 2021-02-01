@@ -61,10 +61,15 @@ func OpenLocal(s string) *os.File {
 */
 
 func IsUrl(s string) bool {
-  _, err := url.ParseRequestURI(s);
+  u, err := url.Parse(s)
   if err != nil {
     return false
   }
-  return true
+
+  if(len(u.Host) > 0) {
+    return true
+  }
+
+  return false
 }
 
