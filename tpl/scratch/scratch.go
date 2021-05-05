@@ -4,6 +4,7 @@
 package scratch
 
 import (
+  _os "os"
 	"sync"
 )
 
@@ -41,4 +42,9 @@ func (c *Scratch) Get(key string) interface{} {
 
 func NewScratch() *Scratch {
 	return &Scratch{values: make(map[string]interface{})}
+}
+
+// Retrieve an environment variable
+func Getenv(key string) (string) {
+  return _os.Getenv(key)
 }

@@ -6,4 +6,5 @@ import (
 
 var FuncMap = template.FuncMap {
   "scratch": NewScratch,
+  "getenv": Getenv,
 }

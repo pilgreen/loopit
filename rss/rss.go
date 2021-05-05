@@ -7,11 +7,6 @@ import(
 
 type RSS struct {
   Channel Channel `xml:"channel" json:"channel"`
-  BannerHTML string `xml:"bannerHtml" json:"bannerHtml,omitempty"`
-  ProfileViewHTML string `xml:"profileViewHtml" json:"profileViewHtml,omitempty"`
-  ItemsWithContentCount int `xml:"itemsWithContentCount" json:"itemsWithContent,omitempty"`
-  IsLinkContent bool `xml:"isLinkContent" json:"isLinkContent,omitempty"`
-  MessageType string  `xml:"messageType" json:"messageType,omitempty"`
 }
 
 type Channel struct {
@@ -32,13 +27,13 @@ type ItemEnclosure struct {
 type Item struct {
   Title string `xml:"title" json:"title"`
   Link string  `xml:"link" json:"link"`
+  Description string `xml:"description" json:"description,omitempty"`
+  Author string `xml:"author" json:"author,omitempty"`
   Comments string `xml:"comments" json:"comments,omitempty"`
   PubDate string `xml:"pubDate" json:"pubDate"`
   GUID string `xml:"guid" json:"uid"`
   Category []string `xml:"category" json:"category"`
   Enclosure []ItemEnclosure `xml:"enclosure" json:"enclosure,omitempty"`
-  Description string `xml:"description" json:"description,omitempty"`
-  Author string `xml:"author" json:"author,omitempty"`
   Media Media `xml:"http://search.yahoo.com/mrss/ content" json:"media,omitempty"`
   Content string `xml:"http://purl.org/rss/1.0/modules/content encoded" json:"content"`
 }

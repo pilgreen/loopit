@@ -7,6 +7,7 @@ import (
   "fmt"
   "io"
   "io/ioutil"
+  "log"
   "net/http"
   "os"
   "path/filepath"
@@ -26,7 +27,7 @@ import (
   "github.com/pilgreen/loopit/rss"
 )
 
-var version = "0.8.1"
+var version = "0.9.0"
 
 type Config struct {
   DataFile string
@@ -125,8 +126,14 @@ func Render(config Config, templates []string) {
       src.Write(t)
     }
 
+    // Output
     if len(config.Output) > 0 {
-      ioutil.WriteFile(config.Output, src.Bytes(), 0644)
+      b := src.Bytes()
+      if len(bytes.TrimSpace(b)) > 0 {
+        ioutil.WriteFile(config.Output, b, 0644)
+      } else {
+        log.Print("skipping file creation due to empty output")
+      }
     } else {
       src.WriteTo(os.Stdout)
     }
