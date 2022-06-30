@@ -14,6 +14,7 @@ var FuncMap = template.FuncMap {
   "lower": ToLower,
   "minify": MinifyCode,
   "markdown": Markdown,
+  "marshal": Marshal,
   "matchRe": MatchRe,
   "replace": Replace,
   "replaceRe": ReplaceRe,

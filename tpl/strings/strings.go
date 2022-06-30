@@ -2,6 +2,7 @@ package strings
 
 import (
   "bytes"
+  "encoding/json"
   "net/url"
   "regexp"
   "strings"
@@ -139,4 +140,13 @@ func Unescape(s string) (string, error) {
 
 func Trim(cutset string, s string) string {
   return strings.Trim(s, cutset)
+}
+
+/**
+ * Returns a marshaled JSON string
+ */
+
+func Marshal(s string) string {
+  b, _ := json.Marshal(s)
+  return string(b)
 }
