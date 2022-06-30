@@ -122,6 +122,14 @@ Returns a string converted to lower case.
 {{ lower "John Smith" }}
 ```
 
+### marshal
+
+Returns a JSON string representation of an object. Like the JavaScript `JSON.stringify()` function.
+
+```
+{{ marshal .tags }}
+```
+
 ### minify
 
 The minify functions sends a string through the [tdewolff/minify](https://github.com/tdewolff/minify) package. The following mimetypes are supported:
