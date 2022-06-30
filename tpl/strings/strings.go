@@ -146,7 +146,7 @@ func Trim(cutset string, s string) string {
  * Returns a marshaled JSON string
  */
 
-func Marshal(s string) string {
-  b, _ := json.Marshal(s)
+func Marshal(d interface{}) string {
+  b, _ := json.Marshal(d)
   return string(b)
 }
